@@ -1,0 +1,2 @@
+#!/bin/sh -x
+sed -i.bak-hook 's# root=.* rw # root=LABEL=RASPIROOT rootflags=subvol=/live rw #' /boot/firmware/cmdline.txt
