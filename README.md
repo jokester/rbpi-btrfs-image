@@ -1,4 +1,4 @@
-# debian-rbpi4b-btrfs-root
+# debian-rbpi-btrfs-image
 
 Scripts to convert Debian's Raspberry Pi disk images to btrfs.
 
@@ -33,3 +33,6 @@ Glad to hear how it works for other models.
 2. Move all files into a btrfs subvolume. This enables easier snapshot / backup.
 3. Mount `/` from the new subvolume.
 
+## License
+
+BSD 2-Clause License. See [LICENSE](LICENSE)
