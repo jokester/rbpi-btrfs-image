@@ -9,9 +9,8 @@ difference with less durable and less performant storage like SD card.
 
 ## Disclaimer
 
-This script is written for, and only tested on, Raspberry Pi 4B. I don't own other Pi-s to try on.
-
-Glad to hear how it works for other models.
+- `btrfs-convert` program required here is somehow deprecated and removed in some distributions. Use at your risk.
+- This script is written for, and only tested on, Raspberry Pi 4B. I don't own other Pi-s to try on. Glad to hear how it works for other models.
 
 <!--
 (It *likely* work on other images: all images are build with [similar configurations](https://salsa.debian.org/raspi-team/image-specs))
@@ -19,7 +18,7 @@ Glad to hear how it works for other models.
 
 ## How to run
 
-(Linux required)
+(Linux and `btrfs-convert` program required)
 
 1. Download and uncompress disk image from https://raspi.debian.net/
 2. As `root`, run `patch-image.sh IMAGE_FILE LOOP_DEVICE`
