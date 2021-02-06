@@ -20,9 +20,11 @@ prepare-mountpoints () {
   mkdir -pv $FS_ROOT
 }
 
-# resize 
+# manjaro-only: resize partition before we can btrfs-convert
 resize-partition-2 () {
-:
+  echo ',+' | sfdisk -N 2 "$1"
+  e2fsck -f "$1p2"
+  resize2fs "$1p2"
 }
 
 ###
