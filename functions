@@ -86,7 +86,7 @@ manjaro-patch-boot () {
 
   ## modify fstab / kernel cmdline
   sed -i.bak-initial                                                   \
-    's#root=LABEL=ROOT_MNJRO.* rw #root=LABEL=ROOT_MNJRO.* rootflags=subvol=/live rw #' \
+    's#root=LABEL=ROOT_MNJRO.* rw #root=LABEL=ROOT_MNJRO rootflags=subvol=/live rw #' \
       $FS_ROOT/boot/cmdline.txt
 
   echo \
