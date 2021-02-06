@@ -1,0 +1,113 @@
+# vim: ft=bash
+
+FS_ROOT=/media/rbpi-root
+
+###
+## setup a loop device for disk image file
+## $1: /dev/loop{NUM}
+## $2: image file
+###
+map-image () {
+  losetup -P "$1" "$2"
+}
+
+## prepare mountpoints
+prepare-mountpoints () {
+  if [[ -e $FS_ROOT ]] ; then
+    echo "remove $FS_ROOT before start"
+    exit 1
+  fi
+  mkdir -pv $FS_ROOT
+}
+
+# manjaro-only: resize partition before we can btrfs-convert
+resize-partition-2 () {
+  echo ',+' | sfdisk -N 2 "$1"
+  e2fsck -f "$1p2"
+  resize2fs "$1p2"
+}
+
+###
+## convert ext4 partition to a btrfs subvolume
+###
+convert-partition () {
+  btrfs-convert "$1p2"
+
+  mount "$1p2" $FS_ROOT -o compress=zstd
+
+  # (debian only) a script to resize (ext4) filesystem on boot
+  rm -vf $FS_ROOT/etc/systemd/system/rpi-resizerootfs.service
+
+  # remove backup volume
+  btrfs subvolume delete $FS_ROOT/ext2_saved
+  ## compress files with zstd
+  btrfs filesystem df $FS_ROOT
+  btrfs filesystem defragment -r -czstd $FS_ROOT
+  btrfs balance start -m $FS_ROOT
+  btrfs filesystem df $FS_ROOT
+
+  ## move everything into subvol=/live-initial
+  # an readonly snapshot of the original image. we can keep it for future reference.
+  btrfs subvolume snapshot -r $FS_ROOT $FS_ROOT/live-initial
+  rm -rf $FS_ROOT 2>/dev/null || true
+
+  ## create subvol=/live, it will become root of live system.
+  btrfs subvolume snapshot $FS_ROOT/live-initial $FS_ROOT/live
+
+  umount $FS_ROOT
+}
+
+### $1: loop device
+debian-patch-boot () {
+  mount "$1p2" $FS_ROOT -o compress=zstd,subvol=/live
+  mount "$1p1" $FS_ROOT/boot/firmware
+
+  ## modify fstab / kernel cmdline
+  sed -i.bak-initial                                                   \
+    's# root=.* rw # root=LABEL=RASPIROOT rootflags=subvol=/live rw #' \
+      $FS_ROOT/boot/firmware/cmdline.txt
+
+  sed -i.bak-initial                                                                                               \
+    "s#^LABEL=RASPIROOT.*#LABEL=RASPIROOT / btrfs defaults,ssd,noatime,nodiratime,compress=zstd,subvol=/live 0 1#" \
+    $FS_ROOT/etc/fstab
+
+  ## install our initramfs/kernel hooks
+  # existed hooks would break our kernel parameters
+  # see https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=971883 for detail
+  cp -v z51-fix-cmdline $FS_ROOT/etc/kernel/postinst.d
+  cp -v z51-fix-cmdline $FS_ROOT/etc/kernel/postrm.d
+  cp -v z51-fix-cmdline $FS_ROOT/etc/initramfs/post-update.d
+}
+
+### $1: loop device
+manjaro-patch-boot () {
+  mount "$1p2" $FS_ROOT -o compress=zstd,subvol=/live
+  mount "$1p1" $FS_ROOT/boot
+
+  ## modify fstab / kernel cmdline
+  sed -i.bak-initial                                                   \
+    's#root=LABEL=ROOT_MNJRO.* rw #root=LABEL=ROOT_MNJRO rootflags=subvol=/live rw #' \
+      $FS_ROOT/boot/cmdline.txt
+
+  echo \
+    "LABEL=ROOT_MNJRO / btrfs defaults,ssd,noatime,nodiratime,compress=zstd,subvol=/live 0 1" \
+    >> $FS_ROOT/etc/fstab
+
+}
+
+cleanup () {
+  ## unmount all
+  sync
+  umount $FS_ROOT/boot/firmware || true # debian
+  umount $FS_ROOT/boot || true # manjaro
+  sleep 1
+  umount $FS_ROOT
+  rmdir $FS_ROOT
+  sleep 1
+  losetup --detach "$1"
+
+
+  cat <<END
+  FINISHED
+END
+}
