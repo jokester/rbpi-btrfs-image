@@ -13,6 +13,8 @@ fi
 cd $(dirname "$0")
 source ./functions
 
+prepare-mountpoints
+
 set -x
 
 truncate --size=3G "$2"
@@ -20,3 +22,9 @@ truncate --size=3G "$2"
 map-image "$1" "$2"
 
 resize-partition-2 "$1"
+
+convert-partition "$1"
+
+manjaro-patch-boot "$1"
+
+cleanup "$1"

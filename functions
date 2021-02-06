@@ -59,9 +59,6 @@ convert-partition () {
 
 ### $1: loop device
 debian-patch-boot () {
-  ## mount root volume and remove unnecessary files
-  # backup subvolume created by btrfs-convert
-  ## unmount subvol=/ , mount subvol=/live
   mount "$1p2" $FS_ROOT -o compress=zstd,subvol=/live
   mount "$1p1" $FS_ROOT/boot/firmware
 
@@ -82,10 +79,27 @@ debian-patch-boot () {
   cp -v z51-fix-cmdline $FS_ROOT/etc/initramfs/post-update.d
 }
 
+### $1: loop device
+manjaro-patch-boot () {
+  mount "$1p2" $FS_ROOT -o compress=zstd,subvol=/live
+  mount "$1p1" $FS_ROOT/boot
+
+  ## modify fstab / kernel cmdline
+  sed -i.bak-initial                                                   \
+    's#root=LABEL=ROOT_MNJRO.* rw #root=LABEL=ROOT_MNJRO.* rootflags=subvol=/live rw #' \
+      $FS_ROOT/boot/cmdline.txt
+
+  echo \
+    "LABEL=ROOT_MNJRO / btrfs defaults,ssd,noatime,nodiratime,compress=zstd,subvol=/live 0 1" \
+    >> $FS_ROOT/etc/fstab
+
+}
+
 cleanup () {
   ## unmount all
   sync
-  umount $FS_ROOT/boot/firmware
+  umount $FS_ROOT/boot/firmware || true # debian
+  umount $FS_ROOT/boot || true # manjaro
   sleep 1
   umount $FS_ROOT
   rmdir $FS_ROOT
