@@ -10,6 +10,9 @@ END
   exit 1
 fi
 
+echo "NOT USABLE until we rebuild manjaro initrd with btrfs module"
+exit 2
+
 cd $(dirname "$0")
 source ./functions
 
