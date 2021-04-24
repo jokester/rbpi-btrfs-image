@@ -1,0 +1,89 @@
+base
+base-devel
+
+# kernel / firmware / ucode
+brcm-patchram-plus
+firmware-raspberrypi
+linux-rpi4
+linux-rpi4-headers
+raspberrypi-bootloader
+raspberrypi-bootloader-x
+raspberrypi-userland-aarch64-git
+rpi-eeprom
+# rpi4-post-install
+
+# networking
+netctl
+wpa_supplicant
+
+# daemons
+openssh
+ntp
+cronie
+logrotate
+haveged
+tlp
+usb_modeswitch
+zswap-arm
+
+# interactive shell
+sudo
+bash-completion
+zsh
+zsh-syntax-highlighting
+screen
+wget
+git
+vi
+vim
+rsync
+mc
+words
+ack
+dos2unix
+pv
+lftp
+tsocks
+corkscrew
+time
+dialog
+neofetch
+man-db
+man-pages
+progress
+
+# archive
+unrar
+zip
+p7zip
+unace
+
+# system tools
+arch-install-scripts
+ntfs-3g
+dosfstools
+btrfs-progs
+squashfs-tools
+gptfdisk
+parted
+smartmontools
+hdparm
+sdparm
+cpupower
+exfat-utils
+yay
+
+# remote fs
+smbclient
+open-iscsi
+
+# monitoring
+acpi
+iotop
+htop
+powertop
+iftop
+sysstat
+cpu-temp-speed
+tmon
+

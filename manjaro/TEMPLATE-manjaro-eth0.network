@@ -1,0 +1,11 @@
+[Match]
+Name=eth0___CHANGE_ME_TO_ENABLE
+
+[Network]
+# DHCP
+DHCP=yes
+
+# static
+Address=192.168.3.100/24
+Gateway=192.168.3.1
+DNS=1.1.1.1
