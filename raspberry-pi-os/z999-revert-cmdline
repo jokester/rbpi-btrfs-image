@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+cat > /boot/cmdline <<END
+console=serial0,115200 console=tty1 root=PARTUUID=21e60f8c-02 rootfstype=btrfs ro rootwait rootflags=subvol=/live
+END
