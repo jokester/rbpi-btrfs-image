@@ -44,6 +44,8 @@ function unmount-fs () {
 }
 
 patch-files () {
+  # a initramfs with btrfs kernel module (NOT WORKING)
+  install -v "$(dirname "$0")/initramfs.gz" "$TEMP_MNT/boot/initramfs.gz"
   install --backup=numbered -v "$(dirname "$0")/cmdline.txt" "$TEMP_MNT/boot/cmdline.txt"
   install --backup=numbered -v "$(dirname "$0")/z999-revert-cmdline" $TEMP_MNT/etc/kernel/postinst.d/z999-revert-cmdline
   install --backup=numbered -v "$(dirname "$0")/z999-revert-cmdline" $TEMP_MNT/etc/kernel/postrm.d/z999-revert-cmdline
