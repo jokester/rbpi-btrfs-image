@@ -15,7 +15,7 @@ function unmap-image () {
 
 function convert-fs () {
   btrfs-convert "${LOOP_DEVICE_PATH}p2"
-  mount "${LOOP_DEVICE_PATH}p2" $TEMP_MNT -t btrfs -o noatime,nodiratime,compress=zstd
+  mount "${LOOP_DEVICE_PATH}p2" $TEMP_MNT -t btrfs -o noatime,nodiratime,compress=zstd,space_cache=v2
 
   btrfs subvolume delete "$TEMP_MNT/ext2_saved"
   sync
@@ -33,7 +33,7 @@ function convert-fs () {
 }
 
 function mount-fs () {
-  mount "${LOOP_DEVICE_PATH}p2" $TEMP_MNT -t btrfs -o noatime,nodiratime,compress=zstd,subvol=/live
+  mount "${LOOP_DEVICE_PATH}p2" $TEMP_MNT -t btrfs -o noatime,nodiratime,compress=zstd,subvol=/live,space_cache=v2
   mount "${LOOP_DEVICE_PATH}p1" $TEMP_MNT/boot
 }
 
@@ -44,11 +44,11 @@ function unmount-fs () {
 }
 
 patch-files () {
-  install -v "$(dirname "$0")/cmdline.txt" "$TEMP_MNT/boot/cmdline.txt"
-  install -v "$(dirname "$0")/z999-revert-cmdline" $TEMP_MNT/etc/kernel/postinst.d
-  install -v "$(dirname "$0")/z999-revert-cmdline" $TEMP_MNT/etc/kernel/postrm.d
-  install -v -D "$(dirname "$0")/z999-revert-cmdline" $TEMP_MNT/etc/initramfs/post-update.d/
-  exit 1
+  install --backup=numbered -v "$(dirname "$0")/cmdline.txt" "$TEMP_MNT/boot/cmdline.txt"
+  install --backup=numbered -v "$(dirname "$0")/z999-revert-cmdline" $TEMP_MNT/etc/kernel/postinst.d/z999-revert-cmdline
+  install --backup=numbered -v "$(dirname "$0")/z999-revert-cmdline" $TEMP_MNT/etc/kernel/postrm.d/z999-revert-cmdline
+  install --backup=numbered -v -D "$(dirname "$0")/z999-revert-cmdline" $TEMP_MNT/etc/initramfs/post-update.d/z999-revert-cmdline
+  install --backup=numbered -v "$(dirname "$0")/fstab" "$TEMP_MNT/etc/fstab"
 }
 
 if [[ $# -ne 1 ]] ; then
